@@ -549,14 +549,15 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 	Uint32 bytesTransfered = 0;
 	Uint8 * ptr8;
 
-	RING_IO_dataBufSize3 = 1024;
+	RING_IO_dataBufSize3 = 1024;   // the DSP reader size 
 
 	/*
 	 *  Set the notification for Writer.
 	 */
-	writerWaterMark
-			= (RING_IO_dataBufSize1 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize1
-					: RINGIO_WRITE_ACQ_SIZE;
+	//writerWaterMark
+	//		= (RING_IO_dataBufSize1 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize1
+	//				: RINGIO_WRITE_ACQ_SIZE;
+	writerWaterMark = RING_IO_dataBufSize1;
 
 	do {
 		status = RingIO_setNotifier(info->writerHandle,
@@ -647,6 +648,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 
 				if (Buffer && info->readerBuf) {
 					if ((totalRcvbytes + info->readerRecvSize) < readerAcqSize)
+					//if ((totalRcvbytes + info->readerRecvSize) < readerAcqSize)
 						memcpy((Buffer + totalRcvbytes), info->readerBuf,
 								info->readerRecvSize);
 				}
@@ -692,8 +694,10 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 							|| (RINGIO_SPENDINGATTRIBUTE == rdRingStatus)) {
 
 						/* got the variable attribute */
+						readerAcqSize = attrs[0];
 
-						info->scaleSize = attrs[0];
+						//info->scaleSize = attrs[0];
+						info->scaleSize =readerAcqSize;
 						info->readerRecvSize = info->scaleSize;
 					} else if (RINGIO_EVARIABLEATTRIBUTE == rdRingStatus) {
 
@@ -904,14 +908,15 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 	Uint32 bytesTransfered = 0;
 	Uint8 * ptr8;
 
-	RING_IO_dataBufSize4 = 2048;
+	RING_IO_dataBufSize4 = 2048;  //The DSP reader Size
 
 	/*
 	 *  Set the notification for Writer.
 	 */
-	writerWaterMark
-			= (RING_IO_dataBufSize2 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize2
-					: RINGIO_WRITE_ACQ_SIZE;
+	//writerWaterMark
+	//		= (RING_IO_dataBufSize2 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize2
+	//				: RINGIO_WRITE_ACQ_SIZE;
+	writerWaterMark= RING_IO_dataBufSize2;
 
 	do {
 		status = RingIO_setNotifier(info->writerHandle,
@@ -1047,8 +1052,10 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 							|| (RINGIO_SPENDINGATTRIBUTE == rdRingStatus)) {
 
 						/* got the variable attribute */
+						readerAcqSize = attrs[0];
 
-						info->scaleSize = attrs[0];
+						//info->scaleSize = attrs[0];
+						info->scaleSize = readerAcqSize;
 						info->readerRecvSize = info->scaleSize;
 					} else if (RINGIO_EVARIABLEATTRIBUTE == rdRingStatus) {
 
