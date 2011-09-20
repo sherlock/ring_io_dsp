@@ -1,0 +1,94 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+DEVICETYPE	Makefile	/^export DEVICETYPE := DSP$/;"	m
+DIRSEP	Makefile	/^        DIRSEP ?=\/$/;"	m
+DIRSEP	Makefile	/^        DIRSEP ?=\\\\$/;"	m
+DIRSEP	Makefile	/^    DIRSEP ?= \/$/;"	m
+DSPLINK_INT_ID	main.c	132;"	d	file:
+DSPLINK_INT_ID	main.c	151;"	d	file:
+DSPLINK_INT_ID	main.c	171;"	d	file:
+DSPLINK_INT_ID	main.c	191;"	d	file:
+DSPLINK_INT_ID	main.c	211;"	d	file:
+DSPLINK_INT_ID	main.c	230;"	d	file:
+DSPLINK_INT_ID	main.c	249;"	d	file:
+DSPLINK_INT_ID	main.c	268;"	d	file:
+DSPLINK_INT_ID	main.c	287;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	123;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	142;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	162;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	182;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	202;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	221;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	240;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	259;"	d	file:
+DSPLINK_INT_VEC_ID	main.c	278;"	d	file:
+DSPLINK_initFlag	main.c	/^volatile Uint32 DSPLINK_initFlag = 0xBABAC0C0 ;$/;"	v
+FILEID	main.c	76;"	d	file:
+FILEID	tskRingIo.c	86;"	d	file:
+HAL_initIsr	main.c	/^static Void HAL_initIsr (Ptr arg)$/;"	f	file:
+MAX_VATTR_NUM	tskRingIo.c	214;"	d	file:
+NOTIFY_DATA_END	tskRingIo.c	162;"	d	file:
+NOTIFY_DATA_START	tskRingIo.c	146;"	d	file:
+NUM_POOLS	ring_io_config.c	74;"	d	file:
+OP_DIVIDE	tskRingIo.c	114;"	d	file:
+OP_FACTOR	tskRingIo.c	95;"	d	file:
+OP_MULTIPLY	tskRingIo.c	105;"	d	file:
+POOL_config	ring_io_config.c	/^POOL_Config POOL_config = {RING_IO_Pools, NUM_POOLS} ;$/;"	v
+RINGIO_DATA_END	tskRingIo.c	154;"	d	file:
+RINGIO_DATA_START	tskRingIo.c	138;"	d	file:
+RINGIO_READ_ACQ_SIZE	tskRingIo.c	130;"	d	file:
+RINGIO_WRITE_ACQ_SIZE	tskRingIo.c	122;"	d	file:
+RING_IO_CONFIG_	ring_io_config.h	44;"	d
+RING_IO_Pools	ring_io_config.c	/^POOL_Obj RING_IO_Pools [NUM_POOLS] =$/;"	v
+RING_IO_READER_NAME1	ring_io_config.h	66;"	d
+RING_IO_READER_NAME2	ring_io_config.h	67;"	d
+RING_IO_WRITER_NAME1	ring_io_config.h	75;"	d
+RING_IO_WRITER_NAME2	ring_io_config.h	76;"	d
+RING_IO_apply	tskRingIo.c	/^RING_IO_apply(RingIO_BufPtr * buffer,Uint32 factor,Uint32 opCode,Uint32 size)$/;"	f	file:
+RING_IO_attrBufSize	main.c	/^Uint16 RING_IO_attrBufSize ;$/;"	v
+RING_IO_dataBufSize1	main.c	/^Uint32 RING_IO_dataBufSize1 ;  \/\/  Sending $/;"	v
+RING_IO_dataBufSize2	main.c	/^Uint32 RING_IO_dataBufSize2 ;  \/\/ Receiving$/;"	v
+RING_IO_dataBufSize3	main.c	/^Uint32 RING_IO_dataBufSize3 ;  \/\/  Sending read$/;"	v
+RING_IO_dataBufSize4	main.c	/^Uint32 RING_IO_dataBufSize4 ;  \/\/ Receiving read$/;"	v
+RING_IO_footBufSize	main.c	/^Uint16 RING_IO_footBufSize ;$/;"	v
+SAMPLEPOOL_FXNS	ring_io_config.c	84;"	d	file:
+SAMPLEPOOL_FXNS	ring_io_config.c	93;"	d	file:
+SAMPLEPOOL_PARAMS	ring_io_config.c	82;"	d	file:
+SAMPLEPOOL_init	ring_io_config.c	85;"	d	file:
+SAMPLEPOOL_init	ring_io_config.c	94;"	d	file:
+SAMPLE_POOL_ID	ring_io_config.h	58;"	d
+SamplePoolParams	ring_io_config.c	/^DMAPOOL_Params SamplePoolParams =$/;"	v
+SamplePoolParams	ring_io_config.c	/^SMAPOOL_Params SamplePoolParams =$/;"	v
+TSKRING_IO_	tskRingIo.h	43;"	d
+TSKRING_IO_TransferInfo	tskRingIo.h	/^} TSKRING_IO_TransferInfo ;$/;"	t	typeref:struct:TSKRING_IO_TransferInfo_tag
+TSKRING_IO_TransferInfo_tag	tskRingIo.h	/^typedef struct TSKRING_IO_TransferInfo_tag {$/;"	s
+TSKRING_IO_create1	tskRingIo.c	/^Int TSKRING_IO_create1(TSKRING_IO_TransferInfo ** infoPtr)$/;"	f
+TSKRING_IO_create2	tskRingIo.c	/^Int TSKRING_IO_create2(TSKRING_IO_TransferInfo ** infoPtr)$/;"	f
+TSKRING_IO_delete1	tskRingIo.c	/^Int TSKRING_IO_delete1 (TSKRING_IO_TransferInfo * info)$/;"	f
+TSKRING_IO_delete2	tskRingIo.c	/^Int TSKRING_IO_delete2 (TSKRING_IO_TransferInfo * info)$/;"	f
+TSKRING_IO_execute1	tskRingIo.c	/^Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info)$/;"	f
+TSKRING_IO_execute2	tskRingIo.c	/^Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info)$/;"	f
+TSKRING_IO_reader_notify	tskRingIo.c	/^TSKRING_IO_reader_notify (RingIO_Handle handle,$/;"	f	file:
+TSKRING_IO_writer_notify	tskRingIo.c	/^TSKRING_IO_writer_notify (RingIO_Handle handle,$/;"	f	file:
+attrs	tskRingIo.c	/^Uint32 attrs [MAX_VATTR_NUM] ;$/;"	v
+freadEnd	tskRingIo.h	/^    Int8           freadEnd;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+freadStart	tskRingIo.h	/^    Int8           freadStart;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+main	main.c	/^Void main (Int argc, Char *argv [])$/;"	f
+readerBuf	tskRingIo.h	/^    Char *         readerBuf  ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+readerHandle	tskRingIo.h	/^    RingIO_Handle  readerHandle ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+readerRecvSize	tskRingIo.h	/^    Uint32         readerRecvSize ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+readerSemObj	tskRingIo.h	/^    SEM_Obj        readerSemObj ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+scaleOpCode	tskRingIo.h	/^    Uint32         scaleOpCode;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+scaleSize	tskRingIo.h	/^    Uint32         scaleSize;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+scalingFactor	tskRingIo.h	/^    Uint32         scalingFactor ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+smaPoolObj	tskRingIo.c	/^SMAPOOL_Params            smaPoolObj ;$/;"	v
+tskRingIo1	main.c	/^static Int tskRingIo1 ()$/;"	f	file:
+tskRingIo2	main.c	/^static Int tskRingIo2 ()$/;"	f	file:
+writerBuf	tskRingIo.h	/^    Char *         writerBuf  ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+writerHandle	tskRingIo.h	/^    RingIO_Handle  writerHandle ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+writerRecvSize	tskRingIo.h	/^    Uint32         writerRecvSize ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
+writerSemObj	tskRingIo.h	/^    SEM_Obj        writerSemObj ;$/;"	m	struct:TSKRING_IO_TransferInfo_tag
