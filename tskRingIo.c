@@ -736,6 +736,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
 		info->freadEnd = FALSE;
+		exitFlag = FALSE;
 
 		///////////////////////////////////////////////////////////////////////////////
 		//End  the read  task
@@ -1094,6 +1095,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
 		info->freadEnd = FALSE;
+		exitFlag = FALSE;
 
 		///////////////////////////////////////////////////////////////////////////////
 		//End  the read  task
