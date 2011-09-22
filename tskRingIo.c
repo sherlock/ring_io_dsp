@@ -160,6 +160,29 @@
  */
 #define NOTIFY_DATA_END         4u
 
+
+
+/*  ============================================================================
+ *  @const   RINGIO_DSP_END
+ *
+ *  @desc     Fixed attribute type indicates  end of the dsp 
+ *  ============================================================================
+ */
+#define RINGIO_DSP_END         5u
+
+
+/*  ============================================================================
+ *  @const   NOTIFY_DSP_END
+ *
+ *  @desc     Notification message  to  DSP.Indicates DSP end
+ *  ============================================================================
+ */
+#define NOTIFY_DSP_END         6u
+
+
+
+
+
 /** ============================================================================
  *  @name   RING_IO_xferBufSize
  *
@@ -411,6 +434,7 @@ Int TSKRING_IO_create1(TSKRING_IO_TransferInfo ** infoPtr) {
 		/* Set the flags to false */
 		info->freadStart = FALSE;
 		info->freadEnd = FALSE;
+		info->exitflag = FALSE;
 	}
 
 	return (status);
@@ -514,6 +538,7 @@ Int TSKRING_IO_create2(TSKRING_IO_TransferInfo ** infoPtr) {
 		/* Set the flags to false */
 		info->freadStart = FALSE;
 		info->freadEnd = FALSE;
+		info->exitflag = FALSE;
 	}
 
 	return (status);
@@ -587,7 +612,8 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 
 	writeAcqSize = writerWaterMark;
 
-	while (1) {
+	//while (1) {
+	while (!info->exitflag) {
 
 		/* Wait for the start notification from gpp */
 		semStatus = SEM_pend(&(info->readerSemObj), SYS_FOREVER);
@@ -598,7 +624,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 			status = SYS_OK;
 		}
 
-		if (info->freadStart == TRUE) {
+		if ((info->freadStart == TRUE)&&(!info->exitflag)) {
 
 			info->freadStart = FALSE;
 
@@ -619,12 +645,12 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 				}
 
 			} while ((status != RINGIO_SUCCESS) && (status
-					!= RINGIO_SPENDINGATTRIBUTE));
+					!= RINGIO_SPENDINGATTRIBUTE) &&(!info->exitflag));
 		}
 
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
-		while (exitFlag == FALSE) {
+		while ((exitFlag == FALSE) && (!info->exitflag)) {
 			rdRingStatus = RingIO_acquire(info->readerHandle,
 					(RingIO_BufPtr *) &(info->readerBuf),
 					&(info->readerRecvSize));
@@ -750,6 +776,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 		///////////////////////////////////////////////////////////////////////////////
 		//To do the algorithms with the Buffer (RING_IO_dataBufSize3)
 		///////////////////////////////////////////////////////////////////////////////
+		//if(&& (!info->exitflag))
 
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -761,7 +788,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 		//start  the write  task
 		///////////////////////////////////////////////////////////////////////////////
 
-		if (RINGIO_SUCCESS == wrRingStatus) {
+		if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 			type = (Uint16) RINGIO_DATA_START;
 			/* Set the attribute start attribute to output */
 			wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type, 0);
@@ -775,13 +802,13 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 					if (wrRingStatus != RINGIO_SUCCESS) {
 						SET_FAILURE_REASON(wrRingStatus);
 					}
-				} while (wrRingStatus != RINGIO_SUCCESS);
+				} while ((wrRingStatus != RINGIO_SUCCESS) && (!info->exitflag));
 			}
 		}
 
-		if (RINGIO_SUCCESS == wrRingStatus) {
+		if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 			//	while ((RING_IO_dataBufSize1 == 0) || (bytesTransfered
-			while ((bytesTransfered < RING_IO_dataBufSize1)) {
+			while ((bytesTransfered < RING_IO_dataBufSize1) && (!info->exitflag) ) {
 				/* Update the attrs to send variable attribute to DSP*/
 				attrs[0] = RING_IO_dataBufSize1;
 				wrRingStatus = RingIO_setvAttribute(info->writerHandle, 0, 0,
@@ -861,20 +888,22 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 			}
 
 			bytesTransfered = 0;
+			if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 
-			/* Send  End of  data transfer attribute to DSP */
-			type = (Uint16) RINGIO_DATA_END;
-			do {
-				wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type,
-						0);
-				if (wrRingStatus != RINGIO_SUCCESS) {
-					SET_FAILURE_REASON(wrRingStatus);
-				} else {
-					status = RINGIO_SUCCESS;
-					
-				}
-			} while (RINGIO_SUCCESS != wrRingStatus);
-			if (RINGIO_SUCCESS == wrRingStatus) {
+				/* Send  End of  data transfer attribute to DSP */
+				type = (Uint16) RINGIO_DATA_END;
+				do {
+					wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type,
+							0);
+					if (wrRingStatus != RINGIO_SUCCESS) {
+						SET_FAILURE_REASON(wrRingStatus);
+					} else {
+						status = RINGIO_SUCCESS;
+						
+					}
+				} while ((RINGIO_SUCCESS != wrRingStatus) && (!info->exitflag));
+			}
+			if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 
 				/* Send Notification  to  the reader (DSP)
 				 * This allows DSP  application to come out from blocked state  if
@@ -893,6 +922,9 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 			}
 		}
 	}
+	status = MEM_free(DSPLINK_SEGID, Buffer, RING_IO_dataBufSize3);
+	
+
 
 	return (status);
 }
@@ -954,7 +986,9 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 
 	writeAcqSize = writerWaterMark;
 
-	while (1) {
+	//while (1) {
+	while (!info->exitflag) {
+
 
 		/* Wait for the start notification from gpp */
 		semStatus = SEM_pend(&(info->readerSemObj), SYS_FOREVER);
@@ -965,7 +999,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 			status = SYS_OK;
 		}
 
-		if (info->freadStart == TRUE) {
+		if ((info->freadStart == TRUE) && (!info->exitflag)) {
 
 			info->freadStart = FALSE;
 
@@ -986,12 +1020,12 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 				}
 
 			} while ((status != RINGIO_SUCCESS) && (status
-					!= RINGIO_SPENDINGATTRIBUTE));
+					!= RINGIO_SPENDINGATTRIBUTE)  && (!info->exitflag));
 		}
 
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
-		while (exitFlag == FALSE) {
+		while ((exitFlag == FALSE)  && (!info->exitflag)) {
 			rdRingStatus = RingIO_acquire(info->readerHandle,
 					(RingIO_BufPtr *) &(info->readerBuf),
 					&(info->readerRecvSize));
@@ -1157,6 +1191,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 		///////////////////////////////////////////////////////////////////////////////
 		//To do the algorithms with the Buffer (RING_IO_dataBufSize3)
 		///////////////////////////////////////////////////////////////////////////////
+		//if( && (!info->exitflag))
 
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -1169,7 +1204,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 		///////////////////////////////////////////////////////////////////////////////
 
 
-		if (RINGIO_SUCCESS == wrRingStatus) {
+		if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 			type = (Uint16) RINGIO_DATA_START;
 			/* Set the attribute start attribute to output */
 			wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type, 0);
@@ -1187,9 +1222,9 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 			}
 		}
 
-		if (RINGIO_SUCCESS == wrRingStatus) {
+		if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 			//while ((RING_IO_dataBufSize2 == 0) || (bytesTransfered
-			while ((bytesTransfered < RING_IO_dataBufSize2)) {
+			while ((bytesTransfered < RING_IO_dataBufSize2)  && (!info->exitflag)) {
 				/* Update the attrs to send variable attribute to DSP*/
 				attrs[0] = RING_IO_dataBufSize2;
 				wrRingStatus = RingIO_setvAttribute(info->writerHandle, 0, 0,
@@ -1269,20 +1304,22 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 			}
 
 			bytesTransfered = 0;
+			if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 
-			/* Send  End of  data transfer attribute to DSP */
-			type = (Uint16) RINGIO_DATA_END;
-			do {
-				wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type,
-						0);
-				if (wrRingStatus != RINGIO_SUCCESS) {
-					SET_FAILURE_REASON(wrRingStatus);
-				} else {
-					status = RINGIO_SUCCESS;
-					
-				}
-			} while (RINGIO_SUCCESS != wrRingStatus);
-			if (RINGIO_SUCCESS == wrRingStatus) {
+				/* Send  End of  data transfer attribute to DSP */
+				type = (Uint16) RINGIO_DATA_END;
+				do {
+					wrRingStatus = RingIO_setAttribute(info->writerHandle, 0, type,
+							0);
+					if (wrRingStatus != RINGIO_SUCCESS) {
+						SET_FAILURE_REASON(wrRingStatus);
+					} else {
+						status = RINGIO_SUCCESS;
+						
+					}
+				} while (RINGIO_SUCCESS != wrRingStatus);
+			}
+			if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 
 				/* Send Notification  to  the reader (DSP)
 				 * This allows DSP  application to come out from blocked state  if
@@ -1301,6 +1338,8 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 			}
 		}
 	}
+
+	status = MEM_free(DSPLINK_SEGID, Buffer, RING_IO_dataBufSize4);
 
 	return (status);
 }
@@ -1534,7 +1573,9 @@ static Void TSKRING_IO_reader_notify(RingIO_Handle handle,
 			 */
 			info->freadEnd = TRUE;
 			break;
-
+		case NOTIFY_DSP_END:
+			info->exitflag = TRUE;
+			break;
 		default:
 			break;
 

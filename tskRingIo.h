@@ -111,6 +111,7 @@ typedef struct TSKRING_IO_TransferInfo_tag {
     Uint32         scaleSize;
     Int8           freadStart;
     Int8           freadEnd;
+    Int8           exitflag;
 } TSKRING_IO_TransferInfo ;
 
 /** ============================================================================
