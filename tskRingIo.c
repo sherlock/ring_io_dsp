@@ -574,6 +574,10 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 
 	readerAcqSize = RING_IO_dataBufSize3;
 	Buffer = MEM_calloc(DSPLINK_SEGID, readerAcqSize, DSPLINK_BUF_ALIGN);
+	if(NULL == Buffer) {
+		status = RINGIO_EFAILURE;
+		SET_FAILURE_REASON(status);
+	}
 
 	do {
 		status = RingIO_setNotifier(info->readerHandle,
@@ -647,7 +651,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 				info->scaleSize -= info->readerRecvSize;
 
 				if (Buffer && info->readerBuf) {
-					if ((totalRcvbytes + info->readerRecvSize) < readerAcqSize)
+					if ((totalRcvbytes + info->readerRecvSize) <= readerAcqSize)
 					//if ((totalRcvbytes + info->readerRecvSize) < readerAcqSize)
 						memcpy((Buffer + totalRcvbytes), info->readerBuf,
 								info->readerRecvSize);
@@ -812,7 +816,8 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 						if (info->writerBuf != NULL) {
 							for (i = 0; i < (info->writerRecvSize); i++) {
 
-								*ptr8 = Buffer[0] * 2;
+								*ptr8 = Buffer[1] * 2;
+								//*ptr8 = 10;
 								ptr8++;
 
 							}
@@ -865,7 +870,8 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 				if (wrRingStatus != RINGIO_SUCCESS) {
 					SET_FAILURE_REASON(wrRingStatus);
 				} else {
-					TSK_yield();
+					status = RINGIO_SUCCESS;
+					
 				}
 			} while (RINGIO_SUCCESS != wrRingStatus);
 			if (RINGIO_SUCCESS == wrRingStatus) {
@@ -881,7 +887,8 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 					SET_FAILURE_REASON(wrRingStatus);
 				} else {
 					status = RINGIO_SUCCESS;
-					;
+					TSK_yield();
+					
 				}
 			}
 		}
@@ -934,6 +941,10 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 
 	readerAcqSize = RING_IO_dataBufSize4;
 	Buffer = MEM_calloc(DSPLINK_SEGID, readerAcqSize, DSPLINK_BUF_ALIGN);
+	if(NULL == Buffer) {
+		status = RINGIO_EFAILURE;
+		SET_FAILURE_REASON(status);
+	}
 
 	do {
 		status = RingIO_setNotifier(info->readerHandle,
@@ -1006,10 +1017,51 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 				 */
 				info->scaleSize -= info->readerRecvSize;
 
+
+
+
+/*
+				//debug
+						
+							do {
+								wrRingStatus = RingIO_sendNotify(info->writerHandle,
+										(RingIO_NotifyMsg)info->readerBuf[0] );
+								if (wrRingStatus != RINGIO_SUCCESS) {
+									SET_FAILURE_REASON(wrRingStatus);
+								}
+							} while (wrRingStatus != RINGIO_SUCCESS);
+						
+
+
+
+
+
+				//debug*/
+				
+
 				if (Buffer && info->readerBuf) {
-					if ((totalRcvbytes + info->readerRecvSize) < readerAcqSize)
+					if ((totalRcvbytes + info->readerRecvSize) <= readerAcqSize)
 						memcpy((Buffer + totalRcvbytes), info->readerBuf,
 								info->readerRecvSize);
+
+					//debug
+
+							/* Sending the Hard Notification to gpp reader */
+							do {
+								wrRingStatus = RingIO_sendNotify(info->writerHandle,
+										(RingIO_NotifyMsg)Buffer[0] );
+								if (wrRingStatus != RINGIO_SUCCESS) {
+									SET_FAILURE_REASON(wrRingStatus);
+								}
+							} while (wrRingStatus != RINGIO_SUCCESS);
+
+
+					//debug
+
+
+
+
+					
 				}
 				totalRcvbytes += info->readerRecvSize;
 
@@ -1173,6 +1225,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 							for (i = 0; i < (info->writerRecvSize); i++) {
 
 								*ptr8 = Buffer[0] * 2;
+								//*ptr8 = 9;
 								ptr8++;
 
 							}
@@ -1225,7 +1278,8 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 				if (wrRingStatus != RINGIO_SUCCESS) {
 					SET_FAILURE_REASON(wrRingStatus);
 				} else {
-					TSK_yield();
+					status = RINGIO_SUCCESS;
+					
 				}
 			} while (RINGIO_SUCCESS != wrRingStatus);
 			if (RINGIO_SUCCESS == wrRingStatus) {
@@ -1241,7 +1295,8 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 					SET_FAILURE_REASON(wrRingStatus);
 				} else {
 					status = RINGIO_SUCCESS;
-					;
+					TSK_yield();
+					
 				}
 			}
 		}

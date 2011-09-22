@@ -367,6 +367,8 @@ Void main(Int argc, Char *argv[]) {
 	TSK_Handle tskRingIoTask1; //for sending
 	TSK_Handle tskRingIoTask2; // for receiving
 
+	TSK_Attrs attrs = TSK_ATTRS;
+
 #if defined (DSP_BOOTMODE_NOBOOT)
 	/* register the init ISR */
 	HAL_intRegister (DSPLINK_INT_ID,
@@ -403,8 +405,16 @@ Void main(Int argc, Char *argv[]) {
 	/* Create Phase */
 	TSKRING_IO_create2(&info2);
 
+
+	
+
+
+
+	attrs.stacksize = 16384;
+
 	/* Creating task for RING_IO application */
-	tskRingIoTask1 = TSK_create(tskRingIo1, NULL, 0);
+	//tskRingIoTask1 = TSK_create(tskRingIo1, NULL, 0);
+	tskRingIoTask1 = TSK_create(tskRingIo1, &attrs, 0);
 	if (tskRingIoTask1 != NULL) {
 		LOG_printf(&trace, "Create RING_IO TSK1: Success\n");
 	} else {
@@ -412,7 +422,8 @@ Void main(Int argc, Char *argv[]) {
 	}
 
 	/* Creating task for RING_IO application */
-	tskRingIoTask2 = TSK_create(tskRingIo2, NULL, 0);
+	//tskRingIoTask2 = TSK_create(tskRingIo2, NULL, 0);
+	tskRingIoTask2 = TSK_create(tskRingIo2, &attrs, 0);
 	if (tskRingIoTask2 != NULL) {
 		LOG_printf(&trace, "Create RING_IO TSK2: Success\n");
 	} else {
