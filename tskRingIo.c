@@ -1574,7 +1574,10 @@ static Void TSKRING_IO_reader_notify(RingIO_Handle handle,
 			info->freadEnd = TRUE;
 			break;
 		case NOTIFY_DSP_END:
+			
 			info->exitflag = TRUE;
+			/*RingIO_sendNotify(info->writerHandle,
+							(RingIO_NotifyMsg)(8));*/
 			break;
 		default:
 			break;
