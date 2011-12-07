@@ -406,6 +406,10 @@ Void main(Int argc, Char *argv[]) {
 	TSKRING_IO_create2(&info2);
 
 
+	
+
+
+
 	attrs.stacksize = 16384;
 
 	/* Creating task for RING_IO application */

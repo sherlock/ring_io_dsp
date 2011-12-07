@@ -118,7 +118,7 @@
  *  @desc   Acquire size of the   RingIO  created by DSP as the writer.
  *  ============================================================================
  */
-#define RINGIO_WRITE_ACQ_SIZE     1024u
+#define RINGIO_WRITE_ACQ_SIZE     640u
 
 /** ============================================================================
  *  @const  FILEID
@@ -574,7 +574,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 	Uint32 bytesTransfered = 0;
 	Uint8 * ptr8;
 
-	RING_IO_dataBufSize3 = 1024;   // the DSP reader size
+	RING_IO_dataBufSize3 = 1024;   // the DSP reader size 
 
 	/*
 	 *  Set the notification for Writer.
@@ -582,8 +582,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 	//writerWaterMark
 	//		= (RING_IO_dataBufSize1 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize1
 	//				: RINGIO_WRITE_ACQ_SIZE;
-	//writerWaterMark = RING_IO_dataBufSize1;
-	writerWaterMark = RINGIO_WRITE_ACQ_SIZE;
+	writerWaterMark = RING_IO_dataBufSize1;
 
 	do {
 		status = RingIO_setNotifier(info->writerHandle,
@@ -598,7 +597,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 	//                 RING_IO_dataBufSize3 : RINGIO_READ_ACQ_SIZE ;
 
 
-	readerAcqSize = RING_IO_dataBufSize3;   //GPP size[0]
+	readerAcqSize = RING_IO_dataBufSize3;
 	Buffer = MEM_calloc(DSPLINK_SEGID, readerAcqSize, DSPLINK_BUF_ALIGN);
 	if(NULL == Buffer) {
 		status = RINGIO_EFAILURE;
@@ -725,10 +724,10 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 							|| (RINGIO_SPENDINGATTRIBUTE == rdRingStatus)) {
 
 						/* got the variable attribute */
-						//readerAcqSize = attrs[0];
+						readerAcqSize = attrs[0];
 
 						//info->scaleSize = attrs[0];
-						info->scaleSize = attrs[0];
+						info->scaleSize =readerAcqSize;
 						info->readerRecvSize = info->scaleSize;
 					} else if (RINGIO_EVARIABLEATTRIBUTE == rdRingStatus) {
 
@@ -763,7 +762,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 
 		}
 
-		//totalRcvbytes = 0;
+		totalRcvbytes = 0;
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
 		info->freadEnd = FALSE;
@@ -772,27 +771,6 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 		///////////////////////////////////////////////////////////////////////////////
 		//End  the read  task
 		///////////////////////////////////////////////////////////////////////////////
-
-
-
-				//debug
-						
-							do {
-								wrRingStatus = RingIO_sendNotify(info->writerHandle,
-										(RingIO_NotifyMsg)(totalRcvbytes) );
-								if (wrRingStatus != RINGIO_SUCCESS) {
-									SET_FAILURE_REASON(wrRingStatus);
-								}
-							} while (wrRingStatus != RINGIO_SUCCESS);
-						
-
-				//debug
-
-
-
-
-
-
 
 
 		///////////////////////////////////////////////////////////////////////////////
@@ -830,16 +808,16 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 
 		if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 			//	while ((RING_IO_dataBufSize1 == 0) || (bytesTransfered
-			while ((bytesTransfered < totalRcvbytes) && (!info->exitflag) ) {
+			while ((bytesTransfered < RING_IO_dataBufSize1) && (!info->exitflag) ) {
 				/* Update the attrs to send variable attribute to DSP*/
-				attrs[0] = RINGIO_WRITE_ACQ_SIZE;
+				attrs[0] = RING_IO_dataBufSize1;
 				wrRingStatus = RingIO_setvAttribute(info->writerHandle, 0, 0,
 						0, attrs, sizeof(attrs));
 
 				if (wrRingStatus == RINGIO_EWRONGSTATE) {
 				} else {
 					/* Acquire writer bufs and initialize and release them. */
-					info->writerRecvSize = RINGIO_WRITE_ACQ_SIZE;
+					info->writerRecvSize = RING_IO_dataBufSize1;
 					wrRingStatus = RingIO_acquire(info->writerHandle,
 							(RingIO_BufPtr *) &(info->writerBuf),
 							&(info->writerRecvSize));
@@ -863,24 +841,24 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 						//Initial the write buffer
 						ptr8 = (Uint8 *) (info->writerBuf);
 						if (info->writerBuf != NULL) {
-							for (i = 0; ((i < info->writerRecvSize) && ((i + bytesTransfered) < totalRcvbytes)); i++) {
+							for (i = 0; i < (info->writerRecvSize); i++) {
 
-								*ptr8 = Buffer[(i + bytesTransfered)] ;
+								*ptr8 = Buffer[1] * 2;
 								//*ptr8 = 10;
 								ptr8++;
 
 							}
 						}
-						if (((bytesTransfered
-								+ info->writerRecvSize) > totalRcvbytes)) {
+						if ((RING_IO_dataBufSize1 != 0) && ((bytesTransfered
+								+ info->writerRecvSize) > RING_IO_dataBufSize1)) {
 
 							/* we have acquired more buffer than the rest of data
 							 * bytes to be transferred */
-							if (bytesTransfered != totalRcvbytes) {
+							if (bytesTransfered != RING_IO_dataBufSize1) {
 
 								wrRingStatus
 										= RingIO_release(info->writerHandle,
-												(totalRcvbytes
+												(RING_IO_dataBufSize1
 														- bytesTransfered));
 								if (RINGIO_SUCCESS != wrRingStatus) {
 									SET_FAILURE_REASON(wrRingStatus);
@@ -892,7 +870,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 							if (RINGIO_SUCCESS != wrRingStatus) {
 								SET_FAILURE_REASON(wrRingStatus);
 							}
-							bytesTransfered = totalRcvbytes;
+							bytesTransfered = RING_IO_dataBufSize1;
 
 						} else {
 							wrRingStatus = RingIO_release(info->writerHandle,
@@ -909,30 +887,7 @@ Int TSKRING_IO_execute1(TSKRING_IO_TransferInfo * info) {
 				}
 			}
 
-
-
-
-				//debug
-						
-							do {
-								wrRingStatus = RingIO_sendNotify(info->writerHandle,
-										(RingIO_NotifyMsg)(bytesTransfered) );
-								if (wrRingStatus != RINGIO_SUCCESS) {
-									SET_FAILURE_REASON(wrRingStatus);
-								}
-							} while (wrRingStatus != RINGIO_SUCCESS);
-						
-
-				//debug
-
-
-
-
-
-
-
 			bytesTransfered = 0;
-			totalRcvbytes = 0;
 			if ((RINGIO_SUCCESS == wrRingStatus) && (!info->exitflag)) {
 
 				/* Send  End of  data transfer attribute to DSP */
@@ -1001,8 +956,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 	//writerWaterMark
 	//		= (RING_IO_dataBufSize2 < RINGIO_WRITE_ACQ_SIZE) ? RING_IO_dataBufSize2
 	//				: RINGIO_WRITE_ACQ_SIZE;
-	//writerWaterMark= RING_IO_dataBufSize2;
-	writerWaterMark= RINGIO_WRITE_ACQ_SIZE;
+	writerWaterMark= RING_IO_dataBufSize2;
 
 	do {
 		status = RingIO_setNotifier(info->writerHandle,
@@ -1098,6 +1052,8 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 				info->scaleSize -= info->readerRecvSize;
 
 
+
+
 /*
 				//debug
 						
@@ -1125,13 +1081,13 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 					//debug
 
 							/* Sending the Hard Notification to gpp reader */
-					/*		do {
+							do {
 								wrRingStatus = RingIO_sendNotify(info->writerHandle,
 										(RingIO_NotifyMsg)Buffer[0] );
 								if (wrRingStatus != RINGIO_SUCCESS) {
 									SET_FAILURE_REASON(wrRingStatus);
 								}
-							} while (wrRingStatus != RINGIO_SUCCESS);*/
+							} while (wrRingStatus != RINGIO_SUCCESS);
 
 
 					//debug
@@ -1141,7 +1097,6 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 
 					
 				}
-
 				totalRcvbytes += info->readerRecvSize;
 
 				/* Release the input buffer(reader buffer) */
@@ -1184,10 +1139,10 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 							|| (RINGIO_SPENDINGATTRIBUTE == rdRingStatus)) {
 
 						/* got the variable attribute */
-						//readerAcqSize = attrs[0];
+						readerAcqSize = attrs[0];
 
 						//info->scaleSize = attrs[0];
-						info->scaleSize = attrs[0];
+						info->scaleSize = readerAcqSize;
 						info->readerRecvSize = info->scaleSize;
 					} else if (RINGIO_EVARIABLEATTRIBUTE == rdRingStatus) {
 
@@ -1222,7 +1177,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 
 		}
 
-		//totalRcvbytes = 0;
+		totalRcvbytes = 0;
 		info->readerRecvSize = readerAcqSize; //the size of RingIO_acquire
 		info->scaleSize = readerAcqSize; //the size of the rest of the RingIO_acquire
 		info->freadEnd = FALSE;
@@ -1269,16 +1224,16 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 
 		if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 			//while ((RING_IO_dataBufSize2 == 0) || (bytesTransfered
-			while ((bytesTransfered < totalRcvbytes)  && (!info->exitflag)) {
+			while ((bytesTransfered < RING_IO_dataBufSize2)  && (!info->exitflag)) {
 				/* Update the attrs to send variable attribute to DSP*/
-				attrs[0] = RINGIO_WRITE_ACQ_SIZE;
+				attrs[0] = RING_IO_dataBufSize2;
 				wrRingStatus = RingIO_setvAttribute(info->writerHandle, 0, 0,
 						0, attrs, sizeof(attrs));
 
 				if (wrRingStatus == RINGIO_EWRONGSTATE) {
 				} else {
 					/* Acquire writer bufs and initialize and release them. */
-					info->writerRecvSize = RINGIO_WRITE_ACQ_SIZE;
+					info->writerRecvSize = RING_IO_dataBufSize2;
 					wrRingStatus = RingIO_acquire(info->writerHandle,
 							(RingIO_BufPtr *) &(info->writerBuf),
 							&(info->writerRecvSize));
@@ -1302,27 +1257,24 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 						//Initial the write buffer
 						ptr8 = (Uint8 *) (info->writerBuf);
 						if (info->writerBuf != NULL) {
-							for (i = 0;
-									((i < info->writerRecvSize)
-											&& ((i + bytesTransfered)
-													< totalRcvbytes)); i++) {
+							for (i = 0; i < (info->writerRecvSize); i++) {
 
-								*ptr8 = Buffer[(i + bytesTransfered)];
-								//*ptr8 = 10;
+								*ptr8 = Buffer[0] * 2;
+								//*ptr8 = 9;
 								ptr8++;
 
 							}
 						}
-						if (((bytesTransfered
-								+ info->writerRecvSize) > totalRcvbytes)) {
+						if ((RING_IO_dataBufSize2 != 0) && ((bytesTransfered
+								+ info->writerRecvSize) > RING_IO_dataBufSize2)) {
 
 							/* we have acquired more buffer than the rest of data
 							 * bytes to be transferred */
-							if (bytesTransfered != totalRcvbytes) {
+							if (bytesTransfered != RING_IO_dataBufSize2) {
 
 								wrRingStatus
 										= RingIO_release(info->writerHandle,
-												(totalRcvbytes
+												(RING_IO_dataBufSize2
 														- bytesTransfered));
 								if (RINGIO_SUCCESS != wrRingStatus) {
 									SET_FAILURE_REASON(wrRingStatus);
@@ -1334,7 +1286,7 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 							if (RINGIO_SUCCESS != wrRingStatus) {
 								SET_FAILURE_REASON(wrRingStatus);
 							}
-							bytesTransfered = totalRcvbytes;
+							bytesTransfered = RING_IO_dataBufSize2;
 
 						} else {
 							wrRingStatus = RingIO_release(info->writerHandle,
@@ -1352,7 +1304,6 @@ Int TSKRING_IO_execute2(TSKRING_IO_TransferInfo * info) {
 			}
 
 			bytesTransfered = 0;
-			totalRcvbytes = 0;
 			if ((RINGIO_SUCCESS == wrRingStatus)  && (!info->exitflag)) {
 
 				/* Send  End of  data transfer attribute to DSP */
